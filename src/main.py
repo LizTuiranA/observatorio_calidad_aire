@@ -6,6 +6,9 @@ from src.exceptions.custom_exceptions import (
     RegistroDuplicadoError,
     RegistroNoEncontradoError,
 )
+from src.repositories.municipio_repository import MunicipioRepository
+from src.controllers.municipio_controller import MunicipioController
+from src.decorators.email_decorator import EmailNotificationDecorator
 
 
 def mostrar_menu():
@@ -77,6 +80,25 @@ def main():
         except (DatoInvalidoError, RegistroDuplicadoError, RegistroNoEncontradoError) as error:
             print(f"Error: {error}")
 
+
+if __name__ == "__main__":
+    main()
+
+def main():
+    # 1. Instanciar Repositorio (Persistencia)
+    repo = MunicipioRepository()
+    
+    # 2. Instanciar Controlador Base (Lógica y Reglas)
+    controlador_base = MunicipioController(repo)
+    
+    # 3. Aplicar Patrón Decorator (EmailService)
+    controlador_decorado = EmailNotificationDecorator(controlador_base)
+    
+    # 4. Instanciar Vista inyectando el controlador decorado (UI)
+    vista = MunicipioView(controlador_decorado)
+    
+    # 5. Iniciar la aplicación
+    vista.mostrar_menu()
 
 if __name__ == "__main__":
     main()
