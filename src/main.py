@@ -1,104 +1,43 @@
-"""Punto de entrada con menu de consola para AlertasAmbientales."""
+"""Punto de entrada principal de la Actividad 7."""
 
-from src.controllers.alerta_controller import AlertaController
-from src.exceptions.custom_exceptions import (
-    DatoInvalidoError,
-    RegistroDuplicadoError,
-    RegistroNoEncontradoError,
-)
-from src.repositories.municipio_repository import MunicipioRepository
-from src.controllers.municipio_controller import MunicipioController
-from src.decorators.email_decorator import EmailNotificationDecorator
+from src.views.alerta_view import AlertaView
+from src.views.estacion_view import EstacionView
+from src.views.medicion_calidad_aire_view import MedicionCalidadAireView
+from src.views.municipio_view import MunicipioView
 
 
-def mostrar_menu():
+def _mostrar_menu_principal() -> None:
     print("\n--- Observatorio de Calidad del Aire ---")
-    print("1. Crear alerta")
-    print("2. Listar alertas")
-    print("3. Buscar alerta")
-    print("4. Actualizar alerta")
-    print("5. Eliminar alerta")
-    print("6. Salir")
+    print("1. Modulo Estaciones")
+    print("2. Modulo Municipios")
+    print("3. Modulo Mediciones")
+    print("4. Modulo Alertas")
+    print("5. Salir")
 
 
-def pedir_datos_alerta(id_alerta_predefinido=None):
-    id_alerta = id_alerta_predefinido if id_alerta_predefinido else input("ID alerta: ")
-    id_medicion = input("ID medicion: ")
-    nivel = input("Nivel (Bajo/Medio/Alto): ")
-    descripcion = input("Descripcion: ")
-    fecha = input("Fecha (YYYY-MM-DD): ")
-    estado = input("Estado (Activa/Cerrada): ")
-    return id_alerta, id_medicion, nivel, descripcion, fecha, estado
-
-
-def main():
-    controller = AlertaController()
+def main() -> None:
+    estacion_view = EstacionView()
+    municipio_view = MunicipioView()
+    medicion_view = MedicionCalidadAireView()
+    alerta_view = AlertaView()
 
     while True:
-        mostrar_menu()
+        _mostrar_menu_principal()
         opcion = input("Seleccione una opcion: ").strip()
+        if opcion == "1":
+            estacion_view.mostrar_menu()
+        elif opcion == "2":
+            municipio_view.mostrar_menu()
+        elif opcion == "3":
+            medicion_view.mostrar_menu()
+        elif opcion == "4":
+            alerta_view.mostrar_menu()
+        elif opcion == "5":
+            print("Saliendo del sistema...")
+            break
+        else:
+            print("Opcion invalida. Intente de nuevo.")
 
-        try:
-            if opcion == "1":
-                datos = pedir_datos_alerta()
-                alerta = controller.crear_alerta(*datos)
-                print(f"Alerta creada: {alerta.id_alerta}")
-
-            elif opcion == "2":
-                alertas = controller.listar_alertas()
-                if not alertas:
-                    print("No hay alertas registradas.")
-                for alerta in alertas:
-                    print(alerta.to_dict())
-
-            elif opcion == "3":
-                id_alerta = input("ID alerta a buscar: ").strip()
-                alerta = controller.buscar_alerta(id_alerta)
-                if alerta:
-                    print(alerta.to_dict())
-                else:
-                    print("Alerta no encontrada.")
-
-            elif opcion == "4":
-                id_alerta = input("ID alerta a actualizar: ").strip()
-                datos = pedir_datos_alerta(id_alerta_predefinido=id_alerta)
-                alerta = controller.actualizar_alerta(*datos)
-                print(f"Alerta actualizada: {alerta.id_alerta}")
-
-            elif opcion == "5":
-                id_alerta = input("ID alerta a eliminar: ").strip()
-                controller.eliminar_alerta(id_alerta)
-                print("Alerta eliminada correctamente.")
-
-            elif opcion == "6":
-                print("Saliendo del sistema...")
-                break
-
-            else:
-                print("Opcion invalida. Intente de nuevo.")
-
-        except (DatoInvalidoError, RegistroDuplicadoError, RegistroNoEncontradoError) as error:
-            print(f"Error: {error}")
-
-
-if __name__ == "__main__":
-    main()
-
-def main():
-    # 1. Instanciar Repositorio (Persistencia)
-    repo = MunicipioRepository()
-    
-    # 2. Instanciar Controlador Base (Lógica y Reglas)
-    controlador_base = MunicipioController(repo)
-    
-    # 3. Aplicar Patrón Decorator (EmailService)
-    controlador_decorado = EmailNotificationDecorator(controlador_base)
-    
-    # 4. Instanciar Vista inyectando el controlador decorado (UI)
-    vista = MunicipioView(controlador_decorado)
-    
-    # 5. Iniciar la aplicación
-    vista.mostrar_menu()
 
 if __name__ == "__main__":
     main()
