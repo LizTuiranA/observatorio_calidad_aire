@@ -1,1 +1,1 @@
-"""Paquete reservado para decoradores futuros."""
+"""Decoradores reservados para futuras implementaciones."""
