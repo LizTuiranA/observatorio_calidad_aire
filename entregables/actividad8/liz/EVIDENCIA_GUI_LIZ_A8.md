@@ -40,10 +40,22 @@ Resultado esperado:
 | Reconocer antes que recordar | Uso de `Combobox` para `nivel` y `estado` en lugar de texto libre. | `src/views_gui/alertas_window.py` |
 
 ## Capturas
-- Pendiente adjuntar:
-  - `entregables/actividad8/liz/capturas/gui_alertas_formulario.png`
-  - `entregables/actividad8/liz/capturas/gui_alertas_guardado_ok.png`
-  - `entregables/actividad8/liz/capturas/gui_alertas_error_validacion.png`
+
+### Formulario de alertas
+
+![Formulario de alertas](./Formulario.jpg)
+
+### Guardado exitoso
+
+![Formulario guardado](./Formulario%20guardado.jpg)
+
+### Validacion de errores
+
+![Error de validacion 1](./Alerta%20erro%20de%20validaci%C3%B3n%201.jpg)
+
+![Error de validacion 2](./Alerta%20erro%20de%20validaci%C3%B3n%202.jpg)
+
+![Error de validacion 3](./Alerta%20erro%20de%20validaci%C3%B3n%203.jpg)
 
 ## Riesgos y notas
 - Si el sistema se ejecuta en entorno sin soporte grafico, Tkinter puede fallar al iniciar ventana.
