@@ -1,5 +1,3 @@
-# Evidencia Individual - Jose
-
 - **Entidad:** `MedicionCalidadAire` (clase base abstracta) +
   `MedicionCalidadAirePM` (subclase concreta para PM10 / PM2.5).
 
@@ -80,11 +78,6 @@ Luego seleccionar la opcion **3. Modulo Mediciones**. El menu permite:
 4. Eliminar medicion — solo MANUALES.
 5. Volver.
 
-## Evidencias a adjuntar
-
-1. Pantallazo del CRUD en consola (crear/listar/actualizar/eliminar).
-2. Pantallazo de `pytest -v` mostrando las **30 pruebas** del modulo
-   de mediciones pasando.
 
 ```bash
 pytest tests/test_medicion_repository.py tests/test_medicion_modelo.py tests/test_medicion_controller.py -v
