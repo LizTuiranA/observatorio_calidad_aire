@@ -1,8 +1,3 @@
----
-output:
-  pdf_document: default
-  html_document: default
----
 ## Documentación Técnica - Módulo Municipio
 
 ------------------------------------------------------------------------
@@ -38,7 +33,6 @@ Se implementaron los siguientes componentes basándose en la arquitectura del pr
 5.  El Repositorio serializa el objeto usando `to_dict()` y reescribe el archivo `data/municipios.json`.
 6.  Al consultar, el Repositorio lee el JSON, deserializa la información con `from_dict()` y retorna objetos de dominio.
 
-> 💡 **Nota de diseño:** Este flujo evita mezclar la lógica de presentación con las reglas de negocio y el acceso directo a los datos.
 
 ------------------------------------------------------------------------
 
@@ -102,7 +96,7 @@ Se cubrieron 10 casos de prueba en `test_municipio_repository.py` verificando el
 
 ## 8. Pantallazo de las pruebas unitarias
 
-
+![alt text](image.png)
 
 ------------------------------------------------------------------------
 
@@ -114,4 +108,8 @@ Se cubrieron 10 casos de prueba en `test_municipio_repository.py` verificando el
 
 ## 10. Conclusión
 
-El módulo de municipios cumple con los requerimientos académicos exigidos para la Actividad 7: \* Se implementa el patrón **MVC** para la separación de responsabilidades. \* Se implementa el patrón de acceso a datos **Repository** con persistencia JSON. \* Se aplican los principios de diseño **SOLID**. \* Se evidencia el control de calidad mediante **10 pruebas unitarias** exitosas y casos borde de la lógica de negocio.
+El módulo de municipios cumple con los requerimientos académicos exigidos para la Actividad 7: \* Se implementa el patrón 
+**MVC** para la separación de responsabilidades. \* Se implementa el patrón de acceso a datos 
+**Repository** con persistencia JSON. \* Se aplican los principios de diseño 
+**SOLID**. \* Se evidencia el control de calidad mediante 
+**10 pruebas unitarias** exitosas y casos borde de la lógica de negocio.
