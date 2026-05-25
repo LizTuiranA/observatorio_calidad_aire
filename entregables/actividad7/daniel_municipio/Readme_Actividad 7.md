@@ -97,6 +97,7 @@ Se cubrieron 10 casos de prueba en `test_municipio_repository.py` verificando el
 
 ## 8. Pantallazo de las pruebas unitarias
 
+<img width="1913" height="1080" alt="Captura de pantalla 2026-05-24 a la(s) 9 12 34 p m" src="https://github.com/user-attachments/assets/f23797b8-4305-472d-afc1-4a2d34828d5f" />
 
 ------------------------------------------------------------------------
 
