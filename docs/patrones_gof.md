@@ -7,8 +7,8 @@
 **Integrantes**
 
 - Liz Giselle Tuiran Alvarez
-- Juanito
-- Daniel
+- Juan 
+- Daniel Felipe Moreno Suarez
 - Jose
 
 **Docente**  
@@ -338,3 +338,253 @@ Encapsula solicitudes como objetos para desacoplar quién invoca de quién ejecu
 - Memento
 - Chain of Responsibility
 
+
+---
+
+Municipio
+
+---
+
+## Patrón: Decorator
+
+### Integrante responsable
+Daniel
+
+### Entidad asociada
+Municipio
+
+### Regla básica de negocio relacionada
+El código del municipio debe existir.
+
+### Categoría
+Estructural
+
+### Problema que resuelve
+Agrega comportamiento adicional en tiempo de ejecución sin modificar la clase original.
+
+### Diagrama de clases
+![Diagrama Decorator](diagramas/decorator.png)
+
+### Casos de uso en el proyecto Observatorio de Calidad del Aire
+- Caso 1: En el controller de `Municipio`, se aplicaría para envolver operaciones `crear` y `actualizar` con `EmailService` sin modificar la clase base; resuelve el problema de introducir notificaciones invadiendo lógica CRUD; es útil porque conserva responsabilidad única en cada clase.
+- Caso 2: En control de cambios, se aplicaría para decorar el flujo con auditoría de validaciones y excepciones; resuelve el problema de mezclar registro técnico con reglas de negocio; es útil porque permite activar o desactivar comportamientos adicionales según entorno.
+
+### Justificación del patrón frente a otras alternativas
+- Decorator es preferible a herencia extensa, porque agrega responsabilidades en tiempo de ejecución sin alterar clases base del MVC.
+
+### Ventajas
+- Extensión flexible y reutilizable.
+- Evita proliferación de herencia rígida.
+
+### Desventajas
+- Multiplica objetos decorados.
+- Puede dificultar lectura del flujo si se encadenan muchos decoradores.
+
+### Patrones relacionados
+- Proxy
+- Facade
+
+---
+
+## Patrón: Flyweight
+
+### Integrante responsable
+Daniel
+
+### Entidad asociada
+Municipio
+
+### Regla básica de negocio relacionada
+El código del municipio debe existir.
+
+### Categoría
+Estructural
+
+### Problema que resuelve
+Comparte estado común para optimizar memoria cuando hay muchas instancias similares.
+
+### Diagrama de clases
+![Diagrama Flyweight](diagramas/flyweight.png)
+
+### Casos de uso en el proyecto Observatorio de Calidad del Aire
+- Caso 1: En el catálogo de `Municipio`, se aplicaría para compartir objetos inmutables de región y departamento entre miles de registros; resuelve el problema de duplicar estado común en memoria; es útil porque optimiza recursos en cargas masivas desde JSON.
+- Caso 2: En validaciones de estado administrativo, se aplicaría para reutilizar estructuras comunes en diferentes entidades; resuelve el problema de repetir valores y reglas en varias clases; es útil porque centraliza consistencia del dominio.
+
+### Justificación del patrón frente a otras alternativas
+- Flyweight es más útil que instanciar objetos repetidos por cada registro, porque comparte estado común y reduce consumo de memoria.
+
+### Ventajas
+- Ahorro de memoria.
+- Mejor rendimiento en colecciones extensas.
+
+### Desventajas
+- Manejo del estado extrínseco más complejo.
+- Menor claridad para equipos inexpertos.
+
+### Patrones relacionados
+- Factory Method
+- Composite
+
+---
+
+## Patrón: Proxy
+
+### Integrante responsable
+Daniel
+
+### Entidad asociada
+Municipio
+
+### Regla básica de negocio relacionada
+El código del municipio debe existir.
+
+### Categoría
+Estructural
+
+### Problema que resuelve
+Controla el acceso a un objeto real agregando validaciones, cache o seguridad.
+
+### Diagrama de clases
+![Diagrama Proxy](diagramas/proxy.png)
+
+### Casos de uso en el proyecto Observatorio de Calidad del Aire
+- Caso 1: En la capa de acceso a `MunicipioRepository`, se aplicaría para verificar permisos de escritura antes de ejecutar CRUD; resuelve el problema de exponer operaciones sensibles sin control; es útil porque protege integridad de datos.
+- Caso 2: En operaciones de consulta/actualización, se aplicaría para comprobar existencia del código municipal y capturar excepciones antes de llegar al repositorio real; resuelve el problema de errores tardíos y mensajes poco claros; es útil porque mejora experiencia del usuario y robustez del sistema.
+
+### Justificación del patrón frente a otras alternativas
+- Proxy es más adecuado que exponer el objeto real directamente, porque permite control de acceso, validaciones previas y manejo uniforme de errores.
+
+### Ventajas
+- Mayor control de acceso.
+- Facilita aplicar políticas de seguridad.
+
+### Desventajas
+- Introduce una capa adicional.
+- Puede aumentar latencia si se abusa.
+
+### Patrones relacionados
+- Decorator
+- Facade
+
+---
+
+## Patrón: Chain of Responsibility
+
+### Integrante responsable
+Daniel
+
+### Entidad asociada
+Municipio
+
+### Regla básica de negocio relacionada
+El código del municipio debe existir.
+
+### Categoría
+Comportamiento
+
+### Problema que resuelve
+Distribuye una solicitud a través de una cadena de manejadores hasta que uno la procese.
+
+### Diagrama de clases
+![Diagrama Chain of Responsibility](diagramas/chain_of_responsibility.png)
+
+### Casos de uso en el proyecto Observatorio de Calidad del Aire
+- Caso 1: En registro de `Municipio`, se aplicaría una cadena de validadores (formato de código, existencia en catálogo, coherencia con departamento/región); resuelve el problema de validar todo en un método monolítico; es útil porque permite agregar nuevas reglas sin alterar las existentes.
+- Caso 2: En actualizaciones masivas desde JSON, se aplicaría para que cada manejador procese o escale errores con mensajes específicos; resuelve el problema de diagnósticos ambiguos; es útil porque facilita soporte y mantenimiento en equipo.
+
+### Justificación del patrón frente a otras alternativas
+- Chain of Responsibility supera a una validación única gigante, porque distribuye responsabilidades y permite extender reglas sin romper el flujo existente.
+
+### Ventajas
+- Facilita extender validaciones sin alterar cliente.
+- Mejora separación de responsabilidades.
+
+### Desventajas
+- Flujo de ejecución menos evidente.
+- Puede no procesarse una solicitud si la cadena se configura mal.
+
+### Patrones relacionados
+- Command
+- Strategy
+
+---
+
+## Patrón: Interpreter
+
+### Integrante responsable
+Daniel
+
+### Entidad asociada
+Municipio
+
+### Regla básica de negocio relacionada
+El código del municipio debe existir.
+
+### Categoría
+Comportamiento
+
+### Problema que resuelve
+Define una representación para una gramática y su evaluación.
+
+### Diagrama de clases
+![Diagrama Interpreter](diagramas/interpreter.png)
+
+### Casos de uso en el proyecto Observatorio de Calidad del Aire
+- Caso 1: En configuración de negocio, se aplicaría para interpretar expresiones como "código inicia con 11 y estado=Activo" durante validaciones de `Municipio`; resuelve el problema de hardcodear reglas en controllers; es útil porque permite ajustar políticas sin reescribir toda la lógica.
+- Caso 2: En reportes, se aplicaría para interpretar filtros declarativos sobre datos JSON (por región, estado, número de estaciones); resuelve el problema de construir consultas manuales repetitivas; es útil porque estandariza la forma de consulta para usuarios técnicos.
+
+### Justificación del patrón frente a otras alternativas
+- Interpreter es más adecuado que codificar todas las reglas en condicionales, cuando se requiere expresar políticas de negocio en forma declarativa.
+
+### Ventajas
+- Reglas expresivas y legibles.
+- Facilita configuraciones sin cambiar código base.
+
+### Desventajas
+- Escala mal para gramáticas grandes.
+- Puede ser menos eficiente.
+
+### Patrones relacionados
+- Visitor
+- Strategy
+
+---
+
+## Patrón: Iterator
+
+### Integrante responsable
+Daniel
+
+### Entidad asociada
+Municipio
+
+### Regla básica de negocio relacionada
+El código del municipio debe existir.
+
+### Categoría
+Comportamiento
+
+### Problema que resuelve
+Permite recorrer estructuras sin exponer su implementación interna.
+
+### Diagrama de clases
+![Diagrama Iterator](diagramas/iterator.png)
+
+### Casos de uso en el proyecto Observatorio de Calidad del Aire
+- Caso 1: En módulos de consulta, se aplicaría para iterar colecciones de `Municipio` sin exponer estructura interna del `Repository`; resuelve el problema de acoplar la vista al almacenamiento; es útil porque mantiene encapsulamiento y flexibilidad.
+- Caso 2: En generación de reportes, se aplicaría para recorrer municipios con estrategias de filtrado por región o estado; resuelve el problema de repetir bucles y condiciones en varios puntos; es útil porque mejora reutilización del recorrido.
+
+### Justificación del patrón frente a otras alternativas
+- Iterator es preferible a exponer listas internas del repositorio, porque desacopla el recorrido de la estructura de almacenamiento.
+
+### Ventajas
+- Encapsula lógica de recorrido.
+- Facilita múltiples estrategias de iteración.
+
+### Desventajas
+- Más clases/objetos auxiliares.
+- Puede ser innecesario en colecciones triviales.
+
+### Patrones relacionados
+- Composite
+- Visitor
