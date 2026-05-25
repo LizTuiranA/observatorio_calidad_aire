@@ -1,3 +1,8 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
 ## Documentación Técnica - Módulo Municipio
 
 ------------------------------------------------------------------------
@@ -33,6 +38,7 @@ Se implementaron los siguientes componentes basándose en la arquitectura del pr
 5.  El Repositorio serializa el objeto usando `to_dict()` y reescribe el archivo `data/municipios.json`.
 6.  Al consultar, el Repositorio lee el JSON, deserializa la información con `from_dict()` y retorna objetos de dominio.
 
+> 💡 **Nota de diseño:** Este flujo evita mezclar la lógica de presentación con las reglas de negocio y el acceso directo a los datos.
 
 ------------------------------------------------------------------------
 
@@ -96,11 +102,7 @@ Se cubrieron 10 casos de prueba en `test_municipio_repository.py` verificando el
 
 ## 8. Pantallazo de las pruebas unitarias
 
-<<<<<<< HEAD
-![alt text](image.png)
-=======
-<img width="1913" height="1080" alt="Captura de pantalla 2026-05-24 a la(s) 9 12 34 p m" src="https://github.com/user-attachments/assets/f23797b8-4305-472d-afc1-4a2d34828d5f" />
->>>>>>> main
+
 
 ------------------------------------------------------------------------
 
@@ -112,8 +114,4 @@ Se cubrieron 10 casos de prueba en `test_municipio_repository.py` verificando el
 
 ## 10. Conclusión
 
-El módulo de municipios cumple con los requerimientos académicos exigidos para la Actividad 7: \* Se implementa el patrón 
-**MVC** para la separación de responsabilidades. \* Se implementa el patrón de acceso a datos 
-**Repository** con persistencia JSON. \* Se aplican los principios de diseño 
-**SOLID**. \* Se evidencia el control de calidad mediante 
-**10 pruebas unitarias** exitosas y casos borde de la lógica de negocio.
+El módulo de municipios cumple con los requerimientos académicos exigidos para la Actividad 7: \* Se implementa el patrón **MVC** para la separación de responsabilidades. \* Se implementa el patrón de acceso a datos **Repository** con persistencia JSON. \* Se aplican los principios de diseño **SOLID**. \* Se evidencia el control de calidad mediante **10 pruebas unitarias** exitosas y casos borde de la lógica de negocio.
