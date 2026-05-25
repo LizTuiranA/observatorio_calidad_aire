@@ -844,3 +844,8 @@ Permite delegar en subclases la decisión de qué tipo concreto de `MedicionCali
 - Abstract Factory
 - Template Method
 - Strategy
+
+
+### Repositorio
+Las pruebas unitarias estan alojadas en el repositorio con el fin de que no quedara extenso el documento
+https://github.com/LizTuiranA/observatorio_calidad_aire
