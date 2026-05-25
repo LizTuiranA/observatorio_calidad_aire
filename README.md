@@ -135,7 +135,7 @@ Total: **60 pruebas unitarias**.
 | Integrante | Entidad | Estado |
 |---|---|---|
 | Liz Giselle Tuiran Alvarez | AlertaAmbiental | Implementado |
-| Integrante 2 | EstacionAmbiental | Implementado |
-| Integrante 3 | Municipio | Implementado |
+| Juan Camilo Moreno Perez| EstacionAmbiental | Implementado |
+| Daniel Felipe Moreno Suarez | Municipio | Implementado |
 | Jose Miguel Rojas Urueta | MedicionCalidadAire | Implementado |
 
