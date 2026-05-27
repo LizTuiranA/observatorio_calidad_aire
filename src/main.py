@@ -1,5 +1,9 @@
 """Punto de entrada principal de la Actividad 7."""
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from src.views.alerta_view import AlertaView
 from src.views.estacion_view import EstacionView
 from src.views.medicion_calidad_aire_view import MedicionCalidadAireView
