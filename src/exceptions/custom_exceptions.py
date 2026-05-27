@@ -15,3 +15,7 @@ class RegistroNoEncontradoError(Exception):
 
 class ArchivoInvalidoError(Exception):
     """Se lanza cuando un archivo JSON tiene formato invalido."""
+
+
+class EmailEnvioError(Exception):
+    """Se lanza cuando falla el envio de un correo de notificacion."""
