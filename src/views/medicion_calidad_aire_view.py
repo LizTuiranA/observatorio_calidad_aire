@@ -53,8 +53,11 @@ class MedicionCalidadAireView:
         if self.controller is not None:
             return
         from src.controllers.medicion_calidad_aire_controller import MedicionController
+        from src.decorators.email_decorator_medicion import EmailDecoratorMedicion
         from src.repositories.medicion_calidad_aire_repository import MedicionRepository
-        self.controller = MedicionController(MedicionRepository(), self)
+        from src.services.email_service import EmailService
+        repo = EmailDecoratorMedicion(MedicionRepository(), EmailService())
+        self.controller = MedicionController(repo, self)
 
     # ── acciones del menu ────────────────────────────────────────────
     def _accion_crear(self) -> None:
