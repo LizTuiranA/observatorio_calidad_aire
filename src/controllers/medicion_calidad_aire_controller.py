@@ -19,9 +19,14 @@ from src.models.estacion_ambiental import (
     EstacionAmbiental,
 )
 from src.models.medicion_calidad_aire import MedicionCalidadAire
+from src.decorators.email_decorator_medicion import EmailDecoratorMedicion
 from src.repositories.estacion_repository import EstacionRepository
-from src.repositories.medicion_calidad_aire_repository import IMedicionRepository
-from src.repositories.medicion_calidad_aire_repository import _canonical_id
+from src.repositories.medicion_calidad_aire_repository import (
+    IMedicionRepository,
+    MedicionRepository,
+    _canonical_id,
+)
+from src.services.email_service import EmailService
 from src.views.medicion_calidad_aire_view import MedicionCalidadAireView
 
 
@@ -30,11 +35,13 @@ class MedicionController:
 
     def __init__(
         self,
-        repository: IMedicionRepository,
-        view: MedicionCalidadAireView,
+        repository: Optional[IMedicionRepository] = None,
+        view: Optional[MedicionCalidadAireView] = None,
         estacion_repository: Optional[EstacionRepository] = None,
     ) -> None:
-        self.repository = repository
+        self.repository = repository or EmailDecoratorMedicion(
+            MedicionRepository(), EmailService()
+        )
         self.view = view
         self._estaciones = estacion_repository or EstacionRepository()
 

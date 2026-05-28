@@ -23,10 +23,10 @@ class MedicionCalidadAireView:
     """Interfaz de consola para el CRUD de mediciones."""
 
     def __init__(self, controller: Optional["MedicionController"] = None):
-        self.controller: "MedicionController" = controller  # type: ignore[assignment]
+        from src.controllers.medicion_calidad_aire_controller import MedicionController
+        self.controller: "MedicionController" = controller or MedicionController(view=self)
 
     def mostrar_menu(self) -> None:
-        self._asegurar_controller()
         while True:
             print("\n--- Menu Mediciones ---")
             print("1. Crear medicion (manual)")
@@ -47,17 +47,6 @@ class MedicionCalidadAireView:
                 return
             else:
                 self.show_error("Opcion invalida.")
-
-    def _asegurar_controller(self) -> None:
-        """Construye el controller con dependencias por defecto si no fue inyectado."""
-        if self.controller is not None:
-            return
-        from src.controllers.medicion_calidad_aire_controller import MedicionController
-        from src.decorators.email_decorator_medicion import EmailDecoratorMedicion
-        from src.repositories.medicion_calidad_aire_repository import MedicionRepository
-        from src.services.email_service import EmailService
-        repo = EmailDecoratorMedicion(MedicionRepository(), EmailService())
-        self.controller = MedicionController(repo, self)
 
     # ── acciones del menu ────────────────────────────────────────────
     def _accion_crear(self) -> None:
