@@ -1,0 +1,1 @@
+"""Capa CLI del sistema."""
