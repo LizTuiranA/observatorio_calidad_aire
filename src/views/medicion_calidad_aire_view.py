@@ -51,17 +51,19 @@ class MedicionCalidadAireView:
     # ── acciones del menu ────────────────────────────────────────────
     def _accion_crear(self) -> None:
         print("(Escriba 'cancelar' en cualquier campo para abortar)")
+        municipios = MunicipioRepository()
+        estaciones = EstacionRepository()
         try:
             tipo = self._pedir_opcion_loop("Tipo", ["PM"])
             medicion_id = self._pedir_id_loop("ID medicion")
             codigo_dane = self._pedir_id_existente_loop(
                 "Codigo DANE municipio",
-                lambda v: MunicipioRepository().buscar_por_id(v) is not None,
+                lambda v: municipios.buscar_por_id(v) is not None,
                 "Municipio inexistente",
             )
             id_estacion = self._pedir_id_existente_loop(
                 "ID estacion",
-                lambda v: EstacionRepository().buscar(v) is not None,
+                lambda v: estaciones.buscar(v) is not None,
                 "Estacion inexistente",
             )
             fecha = self._pedir_fecha_loop("Fecha")
@@ -153,14 +155,6 @@ class MedicionCalidadAireView:
         except ValueError:
             self.show_error(f"Fecha invalida: {crudo!r}")
             return None
-
-    def pedir_opcion(self, etiqueta: str, opciones: Iterable[str]) -> Optional[str]:
-        opciones = list(opciones)
-        crudo = input(f"{etiqueta} {opciones}: ").strip()
-        if crudo not in opciones:
-            self.show_error(f"Opcion invalida: {crudo!r}. Validas: {opciones}")
-            return None
-        return crudo
 
     # ── prompts en bucle (reintentan hasta entrada valida o 'cancelar') ─
     def _pedir_id_loop(self, etiqueta: str) -> str:

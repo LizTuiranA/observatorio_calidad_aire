@@ -70,3 +70,10 @@ def test_9_to_dict_incluye_tipo_y_diametro():
 def test_10_es_eliminable_solo_manuales():
     assert _pm(origen=MedicionCalidadAire.MANUAL).es_eliminable() is True
     assert _pm(origen=MedicionCalidadAire.AUTO).es_eliminable() is False
+
+
+def test_11_from_dict_round_trip():
+    original = _pm(diametro_aerodinamico="PM2.5", medicion=60.0)
+    reconstruida = MedicionCalidadAirePM.from_dict(original.to_dict())
+    assert reconstruida == original
+    assert reconstruida.nivel == "Daniña a la salud"
