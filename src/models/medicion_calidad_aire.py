@@ -7,17 +7,18 @@ clasificar el nivel a partir del valor medido.
 """
 
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from datetime import datetime
 from typing import ClassVar
 
 from src.exceptions.custom_exceptions import DatoInvalidoError
 
 
+@dataclass(frozen=True, kw_only=True)
 class MedicionCalidadAire(ABC):
     """Lectura de un contaminante tomada en una estacion."""
 
     # Origen del dato
-    PENDIENTE: ClassVar[str] = "Pendiente"
     MANUAL: ClassVar[str] = "MANUAL"
     AUTO: ClassVar[str] = "AUTOMATICO"
     ORIGENES_VALIDOS: ClassVar[tuple] = (MANUAL, AUTO)
@@ -33,63 +34,29 @@ class MedicionCalidadAire(ABC):
     # Identificador del contaminante (lo sobrescribe cada subclase).
     TIPO: ClassVar[str] = ""
 
-    def __init__(
-        self,
-        id: str,
-        codigo_dane_municipio: str,
-        id_estacion: str,
-        fecha: datetime,
-        medicion: float,
-        origen: str = AUTO,
-    ) -> None:
-        self._id = id
-        self._codigo_dane_municipio = codigo_dane_municipio
-        self._id_estacion = id_estacion
-        self._fecha = fecha
-        self._medicion = medicion
-        self._origen = origen
-        self._validar_datos()
+    id: str
+    codigo_dane_municipio: str
+    id_estacion: str
+    fecha: datetime
+    medicion: float
+    origen: str = AUTO
 
-    @property
-    def id(self) -> str:
-        return self._id
-
-    @property
-    def codigo_dane_municipio(self) -> str:
-        return self._codigo_dane_municipio
-
-    @property
-    def id_estacion(self) -> str:
-        return self._id_estacion
-
-    @property
-    def fecha(self) -> datetime:
-        return self._fecha
-
-    @property
-    def medicion(self) -> float:
-        return self._medicion
-
-    @property
-    def origen(self) -> str:
-        return self._origen
-
-    def _validar_datos(self) -> None:
-        if not self._id:
+    def __post_init__(self) -> None:
+        if not self.id:
             raise DatoInvalidoError("id no puede estar vacio")
-        if not self._codigo_dane_municipio:
+        if not self.codigo_dane_municipio:
             raise DatoInvalidoError("codigo_dane_municipio no puede estar vacio")
-        if not self._id_estacion:
+        if not self.id_estacion:
             raise DatoInvalidoError("id_estacion no puede estar vacio")
-        if not isinstance(self._fecha, datetime):
+        if not isinstance(self.fecha, datetime):
             raise DatoInvalidoError("fecha debe ser datetime")
-        if not isinstance(self._medicion, (int, float)):
+        if not isinstance(self.medicion, (int, float)):
             raise DatoInvalidoError("medicion debe ser numerica")
-        if self._medicion <= 0:
+        if self.medicion <= 0:
             raise DatoInvalidoError("medicion debe ser positiva")
-        if self._origen not in self.ORIGENES_VALIDOS:
+        if self.origen not in self.ORIGENES_VALIDOS:
             raise DatoInvalidoError(
-                f"Origen invalido: {self._origen}. "
+                f"Origen invalido: {self.origen}. "
                 f"Validos: {self.ORIGENES_VALIDOS}"
             )
 
@@ -107,34 +74,28 @@ class MedicionCalidadAire(ABC):
     def nivel(self) -> str:
         """Categoria ICA correspondiente al valor medido."""
         for limite, categoria in self._puntos_corte:
-            if self._medicion <= limite:
+            if self.medicion <= limite:
                 return categoria
         return self.PELIGROSA
 
-    @property
-    def observacion(self) -> str:
-        if self._origen == self.MANUAL:
-            return "Medicion agregada manualmente"
-        return ""
-
     def es_eliminable(self) -> bool:
         """Las mediciones automaticas son inmutables; solo se borran las manuales."""
-        return self._origen == self.MANUAL
+        return self.origen == self.MANUAL
 
     def to_dict(self) -> dict:
         return {
-            "id": self._id,
-            "codigo_dane_municipio": self._codigo_dane_municipio,
-            "id_estacion": self._id_estacion,
-            "fecha": self._fecha.isoformat(),
+            "id": self.id,
+            "codigo_dane_municipio": self.codigo_dane_municipio,
+            "id_estacion": self.id_estacion,
+            "fecha": self.fecha.isoformat(),
             "tipo": type(self).TIPO,
-            "medicion": self._medicion,
+            "medicion": self.medicion,
             "nivel": self.nivel,
-            "origen": self._origen,
-            "observacion": self.observacion,
+            "origen": self.origen,
         }
 
 
+@dataclass(frozen=True, kw_only=True)
 class MedicionCalidadAirePM(MedicionCalidadAire):
     """Material particulado PM10 y PM2.5 (promedio 24h)."""
 
@@ -163,41 +124,23 @@ class MedicionCalidadAirePM(MedicionCalidadAire):
         ],
     }
 
-    def __init__(
-        self,
-        id: str,
-        codigo_dane_municipio: str,
-        id_estacion: str,
-        fecha: datetime,
-        diametro_aerodinamico: str,
-        medicion: float,
-        origen: str = MedicionCalidadAire.AUTO,
-    ) -> None:
-        # Se asigna antes del super().__init__ porque _validar_datos lo necesita.
-        self._diametro_aerodinamico = diametro_aerodinamico
-        super().__init__(
-            id, codigo_dane_municipio, id_estacion, fecha, medicion, origen
-        )
+    diametro_aerodinamico: str
 
-    @property
-    def diametro_aerodinamico(self) -> str:
-        return self._diametro_aerodinamico
-
-    def _validar_datos(self) -> None:
-        super()._validar_datos()
-        if self._diametro_aerodinamico not in self.DIAMETROS_VALIDOS:
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        if self.diametro_aerodinamico not in self.DIAMETROS_VALIDOS:
             raise DatoInvalidoError(
-                f"Diametro aerodinamico invalido: {self._diametro_aerodinamico}. "
+                f"Diametro aerodinamico invalido: {self.diametro_aerodinamico}. "
                 f"Validos: {self.DIAMETROS_VALIDOS}"
             )
 
     @property
     def _puntos_corte(self) -> list[tuple[float, str]]:
-        return self._PUNTOS_CORTE[self._diametro_aerodinamico]
+        return self._PUNTOS_CORTE[self.diametro_aerodinamico]
 
     def to_dict(self) -> dict:
         data = super().to_dict()
-        data["diametro_aerodinamico"] = self._diametro_aerodinamico
+        data["diametro_aerodinamico"] = self.diametro_aerodinamico
         return data
 
     @classmethod

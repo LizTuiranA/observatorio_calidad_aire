@@ -98,3 +98,10 @@ def test_9_persistencia_entre_instancias(tmp_path):
 def test_10_buscar_inexistente_devuelve_none(tmp_path):
     repo = _repo(tmp_path)
     assert repo.buscar_medicion_por_id("X999") is None
+
+
+def test_11_lookup_canonico_ignora_caso_y_espacios(tmp_path):
+    repo = _repo(tmp_path)
+    repo.crear_medicion(_medicion(id="M001"))
+    assert repo.buscar_medicion_por_id("  m001  ") is not None
+    assert repo.eliminar_medicion(" m001 ") is True

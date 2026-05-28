@@ -144,21 +144,49 @@ def test_9_listar_mediciones(contexto):
     assert len(vista.listados[0]) == 1
 
 
-def test_10_sincronizar_sensor_no_pisa_manuales(contexto):
+def test_10_crear_duplicado_reporta_error(contexto):
     controller, repo, vista = contexto
     controller.crear_medicion(
         "PM", "M001", "05001", "EST-MED-01",
         datetime(2026, 5, 20), 42.5,
         diametro_aerodinamico="PM10",
     )
-    controller.sincronizar_sensor([{
-        "tipo": "PM",
-        "id": "M001",  # mismo id que la manual
-        "codigo_dane_municipio": "05001",
-        "id_estacion": "EST-MED-01",
-        "fecha": "2026-05-21T10:00",
-        "medicion": 999.0,
-        "diametro_aerodinamico": "PM10",
-    }])
-    # La medicion manual no debe ser sobrescrita.
+    controller.crear_medicion(
+        "PM", "M001", "05001", "EST-MED-01",
+        datetime(2026, 5, 21), 30.0,
+        diametro_aerodinamico="PM10",
+    )
+    assert len(repo.listar_mediciones()) == 1
+    assert any("ya existe" in e.lower() for e in vista.errores)
+
+
+def test_11_actualizar_con_valor_invalido_reporta_error(contexto):
+    controller, repo, vista = contexto
+    controller.crear_medicion(
+        "PM", "M001", "05001", "EST-MED-01",
+        datetime(2026, 5, 20), 42.5,
+        diametro_aerodinamico="PM10",
+    )
+    controller.actualizar_medicion("M001", medicion=-1.0)
     assert repo.buscar_medicion_por_id("M001").medicion == 42.5
+    assert vista.errores
+
+
+def test_12_eliminar_inexistente_reporta_error(contexto):
+    controller, _, vista = contexto
+    controller.eliminar_medicion("X999")
+    assert any("no se encontro" in e.lower() for e in vista.errores)
+
+
+def test_13_no_eliminar_medicion_automatica(contexto):
+    controller, repo, vista = contexto
+    from src.models.medicion_calidad_aire import MedicionCalidadAirePM
+    repo.crear_medicion(MedicionCalidadAirePM(
+        id="A001", codigo_dane_municipio="05001", id_estacion="EST-MED-01",
+        fecha=datetime(2026, 5, 20), diametro_aerodinamico="PM10",
+        medicion=42.5, origen=MedicionCalidadAire.AUTO,
+    ))
+    controller.eliminar_medicion("A001")
+    assert repo.buscar_medicion_por_id("A001") is not None
+    assert any("manuales" in e.lower() for e in vista.errores)
+
