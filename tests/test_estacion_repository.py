@@ -1,3 +1,39 @@
+"""Pruebas de persistencia JSON para estaciones ambientales."""
+
+import pytest
+
+from src.models.estacion_ambiental import DuplicateEstacionError, EstacionAmbiental
+from src.repositories.estacion_repository import EstacionRepository
+
+
+def _estacion_base(**overrides) -> EstacionAmbiental:
+    datos = {
+        "id_estacion": "EST-100",
+        "nombre": "Centro",
+        "municipio": "05001",
+        "tipo_estacion": "Fija",
+        "estado": "Activa",
+    }
+    datos.update(overrides)
+    return EstacionAmbiental(**datos)
+
+
+def test_repository_crea_y_lista_estaciones(tmp_path):
+    repo = EstacionRepository(tmp_path / "estaciones.json")
+
+    creada = repo.crear(_estacion_base())
+
+    assert creada.id_estacion == "EST-100"
+    assert repo.buscar("EST-100") is not None
+    assert len(repo.listar()) == 1
+
+
+def test_repository_rechaza_ids_duplicados(tmp_path):
+    repo = EstacionRepository(tmp_path / "estaciones.json")
+    repo.crear(_estacion_base())
+
+    with pytest.raises(DuplicateEstacionError):
+        repo.crear(_estacion_base(nombre="Otro nombre"))
 """Pruebas unitarias para EstacionRepository y EstacionAmbiental."""
 
 import pytest
