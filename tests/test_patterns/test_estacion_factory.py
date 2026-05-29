@@ -17,3 +17,18 @@ def test_factory_crea_estacion_ambiental():
     assert estacion.id_estacion == "EST-001"
     assert estacion.nombre == "Centro"
     assert estacion.estado == "Activa"
+
+
+def test_factory_desde_dict_crea_estacion():
+    data = {
+        "id_estacion": "EST-002",
+        "nombre": "Norte",
+        "municipio": "Bogota",
+        "tipo_estacion": "Movil",
+        "estado": "Inactiva",
+    }
+
+    estacion = EstacionFactory.desde_dict(data)
+
+    assert estacion.id_estacion == "EST-002"
+    assert estacion.to_dict()["tipo_estacion"] == "Movil"
