@@ -1,3 +1,89 @@
+"""Pruebas de persistencia JSON para estaciones ambientales."""
+
+import json
+
+import pytest
+
+from src.exceptions.custom_exceptions import ArchivoInvalidoError, RegistroNoEncontradoError
+from src.models.estacion_ambiental import DuplicateEstacionError, EstacionAmbiental
+from src.repositories.estacion_repository import EstacionRepository
+
+
+def _estacion_base(**overrides) -> EstacionAmbiental:
+    datos = {
+        "id_estacion": "EST-100",
+        "nombre": "Centro",
+        "municipio": "05001",
+        "tipo_estacion": "Fija",
+        "estado": "Activa",
+    }
+    datos.update(overrides)
+    return EstacionAmbiental(**datos)
+
+
+def test_repository_crea_y_lista_estaciones(tmp_path):
+    repo = EstacionRepository(tmp_path / "estaciones.json")
+
+    creada = repo.crear(_estacion_base())
+
+    assert creada.id_estacion == "EST-100"
+    assert repo.buscar("EST-100") is not None
+    assert len(repo.listar()) == 1
+
+
+def test_repository_rechaza_ids_duplicados(tmp_path):
+    repo = EstacionRepository(tmp_path / "estaciones.json")
+    repo.crear(_estacion_base())
+
+    with pytest.raises(DuplicateEstacionError):
+        repo.crear(_estacion_base(nombre="Otro nombre"))
+
+
+def test_repository_buscar_inexistente_devuelve_none(tmp_path):
+    repo = EstacionRepository(tmp_path / "estaciones.json")
+
+    assert repo.buscar("EST-999") is None
+
+
+def test_repository_lee_archivo_vacio_como_lista(tmp_path):
+    archivo = tmp_path / "estaciones.json"
+    archivo.write_text("", encoding="utf-8")
+
+    repo = EstacionRepository(archivo)
+
+    assert repo.listar() == []
+
+
+def test_repository_rechaza_json_invalido_sin_lista(tmp_path):
+    archivo = tmp_path / "estaciones.json"
+    archivo.write_text(json.dumps({"id_estacion": "NO-LISTA"}), encoding="utf-8")
+
+    repo = EstacionRepository(archivo)
+
+    with pytest.raises(ArchivoInvalidoError):
+        repo.listar()
+
+
+def test_repository_actualiza_y_elimina(tmp_path):
+    repo = EstacionRepository(tmp_path / "estaciones.json")
+    repo.crear(_estacion_base())
+
+    actualizada = repo.actualizar(
+        _estacion_base(nombre="Centro Actualizado", estado="Inactiva")
+    )
+
+    assert actualizada.nombre == "Centro Actualizado"
+    assert repo.buscar("EST-100").estado == "Inactiva"
+
+    assert repo.eliminar("EST-100") is True
+    assert repo.buscar("EST-100") is None
+
+
+def test_repository_eliminar_inexistente_lanza_error(tmp_path):
+    repo = EstacionRepository(tmp_path / "estaciones.json")
+
+    with pytest.raises(RegistroNoEncontradoError):
+        repo.eliminar("EST-999")
 """Pruebas unitarias para EstacionRepository y EstacionAmbiental."""
 
 import pytest
