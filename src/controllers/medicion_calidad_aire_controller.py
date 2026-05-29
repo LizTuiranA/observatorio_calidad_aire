@@ -22,7 +22,9 @@ from src.repositories.medicion_calidad_aire_repository import (
     MedicionRepository,
     _canonical_id,
 )
+from src.repositories.municipio_repository import MunicipioRepository
 from src.services.email_service import EmailService
+from src.validators.medicion_validator import MedicionValidator
 from src.views.medicion_calidad_aire_view import MedicionCalidadAireView
 
 
@@ -34,12 +36,18 @@ class MedicionController:
         repository: Optional[IMedicionRepository] = None,
         view: Optional[MedicionCalidadAireView] = None,
         estacion_repository: Optional[EstacionRepository] = None,
+        municipio_repository: Optional[MunicipioRepository] = None,
+        validator: Optional[MedicionValidator] = None,
     ) -> None:
         self.repository = repository or EmailDecoratorMedicion(
             MedicionRepository(), EmailService()
         )
         self.view = view
         self._estaciones = estacion_repository or EstacionRepository()
+        self._municipios = municipio_repository or MunicipioRepository()
+        self._validator = validator or MedicionValidator(
+            self._estaciones, self._municipios
+        )
 
     def crear_medicion(
         self,
@@ -50,18 +58,13 @@ class MedicionController:
         fecha: datetime,
         medicion: float,
         **extra,
-    ) -> None:
+    ) -> Optional[MedicionCalidadAire]:
         """Registra una medicion MANUAL ingresada por el usuario."""
         id = _canonical_id(id)
         codigo_dane_municipio = _canonical_id(codigo_dane_municipio)
         id_estacion = _canonical_id(id_estacion)
-        if self._estaciones.buscar(id_estacion) is None:
-            self.view.show_error(
-                f"Estacion {id_estacion!r} no existe. "
-                "Registrela antes de crear mediciones manuales."
-            )
-            return
         try:
+            self._validator.validar(id_estacion, codigo_dane_municipio, fecha)
             nueva = MedicionFactory.crear(
                 tipo,
                 id=id,
@@ -75,10 +78,11 @@ class MedicionController:
             self.repository.crear_medicion(nueva)
         except (DatoInvalidoError, RegistroDuplicadoError) as e:
             self.view.show_error(str(e))
-            return
+            return None
         self.view.show_message(
             f"Medicion {id} creada manualmente — nivel: {nueva.nivel}"
         )
+        return nueva
 
     def actualizar_medicion(
         self,
@@ -88,11 +92,11 @@ class MedicionController:
         fecha: Optional[datetime] = None,
         medicion: Optional[float] = None,
         **extra,
-    ) -> None:
+    ) -> Optional[MedicionCalidadAire]:
         """Modifica una medicion MANUAL existente (las AUTO son inmutables)."""
         existente = self._buscar_editable(_canonical_id(medicion_id))
         if existente is None:
-            return
+            return None
 
         cambios = {}
         if codigo_dane_municipio is not None:
@@ -107,14 +111,20 @@ class MedicionController:
 
         try:
             actualizada = replace(existente, **cambios)
+            self._validator.validar(
+                actualizada.id_estacion,
+                actualizada.codigo_dane_municipio,
+                actualizada.fecha,
+            )
             self.repository.actualizar_medicion(actualizada)
         except (DatoInvalidoError, RegistroNoEncontradoError) as e:
             self.view.show_error(str(e))
-            return
+            return None
 
         self.view.show_message(
             f"Medicion {existente.id} actualizada — nivel: {actualizada.nivel}"
         )
+        return actualizada
 
     def _buscar_editable(self, medicion_id: str) -> Optional[MedicionCalidadAire]:
         """Devuelve la medicion si existe y es editable; muestra error y devuelve None si no."""
@@ -141,3 +151,11 @@ class MedicionController:
 
     def listar_mediciones(self) -> None:
         self.view.show_mediciones(self.repository.listar_mediciones())
+
+    def obtener_mediciones(self) -> list[MedicionCalidadAire]:
+        """Retorna la lista de mediciones sin pasar por la vista."""
+        return self.repository.listar_mediciones()
+
+    def obtener_medicion_por_id(self, medicion_id: str) -> Optional[MedicionCalidadAire]:
+        """Busca una medicion por id sin pasar por la vista."""
+        return self.repository.buscar_medicion_por_id(_canonical_id(medicion_id))
