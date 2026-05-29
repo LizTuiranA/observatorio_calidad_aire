@@ -2,6 +2,7 @@
 
 import pytest
 
+from src.exceptions.custom_exceptions import RegistroNoEncontradoError
 from src.models.estacion_ambiental import DuplicateEstacionError, EstacionAmbiental
 from src.repositories.estacion_repository import EstacionRepository
 
@@ -34,6 +35,12 @@ def test_repository_rechaza_ids_duplicados(tmp_path):
 
     with pytest.raises(DuplicateEstacionError):
         repo.crear(_estacion_base(nombre="Otro nombre"))
+
+
+def test_repository_buscar_inexistente_devuelve_none(tmp_path):
+    repo = EstacionRepository(tmp_path / "estaciones.json")
+
+    assert repo.buscar("EST-999") is None
 """Pruebas unitarias para EstacionRepository y EstacionAmbiental."""
 
 import pytest
