@@ -1,5 +1,8 @@
 """Controlador de Municipio para coordinar modelo y repositorio."""
 
+from typing import Optional
+
+from src.decorators.email_decorator_municipio import EmailDecoratorMunicipio
 from src.exceptions.municipio_exceptions import (
     DatosMunicipioInvalidosError,
     MunicipioNoEncontradoError,
@@ -7,13 +10,16 @@ from src.exceptions.municipio_exceptions import (
 )
 from src.models.municipio import Municipio
 from src.repositories.municipio_repository import MunicipioRepository
+from src.services.email_service import EmailService
 
 
 class MunicipioController:
     """Implementa logica de negocio de municipios."""
 
-    def __init__(self, repository=None):
-        self.repository = repository or MunicipioRepository()
+    def __init__(self, repository: Optional[MunicipioRepository] = None) -> None:
+        self.repository = repository or EmailDecoratorMunicipio(
+            MunicipioRepository(), EmailService()
+        )
 
     def crear_municipio(self, id_municipio, nombre, departamento, region, estado):
         existente = self.repository.buscar_por_id(id_municipio)

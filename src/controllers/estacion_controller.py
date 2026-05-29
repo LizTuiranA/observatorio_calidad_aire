@@ -1,6 +1,6 @@
 """Controlador para operaciones CRUD de EstacionAmbiental."""
 
-from src.models.estacion_ambiental import EstacionAmbiental
+from src.patterns.factory_method.estacion_factory import EstacionFactory
 from src.repositories.estacion_repository import EstacionRepository
 
 
@@ -11,7 +11,13 @@ class EstacionController:
         self.repository = repository or EstacionRepository()
 
     def crear_estacion(self, id_estacion, nombre, municipio, tipo_estacion, estado):
-        estacion = EstacionAmbiental(id_estacion, nombre, municipio, tipo_estacion, estado)
+        estacion = EstacionFactory.crear(
+            id_estacion,
+            nombre,
+            municipio,
+            tipo_estacion,
+            estado,
+        )
         return self.repository.crear(estacion)
 
     def listar_estaciones(self):
@@ -21,7 +27,13 @@ class EstacionController:
         return self.repository.buscar(id_estacion)
 
     def actualizar_estacion(self, id_estacion, nombre, municipio, tipo_estacion, estado):
-        estacion = EstacionAmbiental(id_estacion, nombre, municipio, tipo_estacion, estado)
+        estacion = EstacionFactory.crear(
+            id_estacion,
+            nombre,
+            municipio,
+            tipo_estacion,
+            estado,
+        )
         return self.repository.actualizar(estacion)
 
     def eliminar_estacion(self, id_estacion):

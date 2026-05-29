@@ -70,5 +70,38 @@
         "origen": "MANUAL",
         "observacion": "Medicion agregada manualmente",
         "diametro_aerodinamico": "PM2.5"
+    },
+    {
+        "id": "M0003",
+        "codigo_dane_municipio": "05001",
+        "id_estacion": "EST-MED-01",
+        "fecha": "2026-05-26T00:00:00",
+        "tipo": "PM",
+        "medicion": 40.0,
+        "nivel": "Buena",
+        "origen": "MANUAL",
+        "diametro_aerodinamico": "PM10"
+    },
+    {
+        "id": "M0004",
+        "codigo_dane_municipio": "05001",
+        "id_estacion": "EST-MED-01",
+        "fecha": "2026-05-27T00:00:00",
+        "tipo": "PM",
+        "medicion": 50.0,
+        "nivel": "Buena",
+        "origen": "MANUAL",
+        "diametro_aerodinamico": "PM10"
+    },
+    {
+        "id": "M0005",
+        "codigo_dane_municipio": "05001",
+        "id_estacion": "EST-MED-01",
+        "fecha": "2026-05-28T00:00:00",
+        "tipo": "PM",
+        "medicion": 70.0,
+        "nivel": "Daniña a la salud",
+        "origen": "MANUAL",
+        "diametro_aerodinamico": "PM2.5"
     }
 ]
