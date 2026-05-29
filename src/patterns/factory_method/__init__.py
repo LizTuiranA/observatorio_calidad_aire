@@ -1,0 +1,1 @@
+"""Factory methods del proyecto."""
