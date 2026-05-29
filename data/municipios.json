@@ -19,5 +19,12 @@
         "departamento": "Valle del Cauca",
         "region": "Pacifica",
         "estado": "Activo"
+    },
+    {
+        "id_municipio": "25740",
+        "nombre": "Soacha",
+        "departamento": "Cundinamarca",
+        "region": "Andina",
+        "estado": "Activo"
     }
 ]
