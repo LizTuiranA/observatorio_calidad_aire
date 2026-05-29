@@ -1,5 +1,9 @@
 """Factory Method para crear entidades de estaciones ambientales."""
 
+from __future__ import annotations
+
+from typing import Any
+
 from src.models.estacion_ambiental import EstacionAmbiental
 
 
@@ -22,3 +26,8 @@ class EstacionFactory:
             tipo_estacion=tipo_estacion,
             estado=estado,
         )
+
+    @staticmethod
+    def desde_dict(data: dict[str, Any]) -> EstacionAmbiental:
+        """Crea una estacion a partir de un diccionario serializado."""
+        return EstacionAmbiental.from_dict(data)
