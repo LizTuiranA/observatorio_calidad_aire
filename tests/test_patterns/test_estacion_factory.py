@@ -1,6 +1,9 @@
 """Pruebas unitarias para la Factory Method de estaciones."""
 
+import pytest
+
 from src.models.estacion_ambiental import EstacionAmbiental
+from src.models.estacion_ambiental import EstacionValidationError
 from src.patterns.factory_method.estacion_factory import EstacionFactory
 
 
@@ -32,3 +35,14 @@ def test_factory_desde_dict_crea_estacion():
 
     assert estacion.id_estacion == "EST-002"
     assert estacion.to_dict()["tipo_estacion"] == "Movil"
+
+
+def test_factory_rechaza_estado_invalido():
+    with pytest.raises(EstacionValidationError):
+        EstacionFactory.crear(
+            "EST-003",
+            "Sur",
+            "Cali",
+            "Fija",
+            "Suspendida",
+        )
