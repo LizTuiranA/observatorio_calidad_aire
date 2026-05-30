@@ -1,26 +1,42 @@
 [
     {
-        "id_alerta": "1",
-        "id_medicion": "10",
+        "id_alerta": "ALT-001",
+        "id_medicion": "A004",
         "nivel": "Alto",
-        "descripcion": "Nivel Alto",
-        "fecha": "2026-05-23",
+        "descripcion": "PM10 270 ug/m3 en Bogota D.C. (EST-BOG-01): nivel daniño a la salud",
+        "fecha": "2026-05-22",
         "estado": "Activa"
     },
     {
-        "id_alerta": "2",
-        "id_medicion": "20",
+        "id_alerta": "ALT-002",
+        "id_medicion": "M0005",
         "nivel": "Alto",
-        "descripcion": "Alto Nivel",
-        "fecha": "2026-05-23",
+        "descripcion": "PM2.5 70 ug/m3 en Medellin (EST-MED-01): nivel daniño a la salud",
+        "fecha": "2026-05-28",
         "estado": "Activa"
     },
     {
-        "id_alerta": "ALT-900",
-        "id_medicion": "MED-900",
-        "nivel": "Alto",
-        "descripcion": "Prueba manual",
-        "fecha": "2026-05-24",
+        "id_alerta": "ALT-003",
+        "id_medicion": "A002",
+        "nivel": "Medio",
+        "descripcion": "PM10 115 ug/m3 en Medellin (EST-MED-01): calidad aceptable, en monitoreo",
+        "fecha": "2026-05-20",
         "estado": "Activa"
+    },
+    {
+        "id_alerta": "ALT-004",
+        "id_medicion": "A003",
+        "nivel": "Bajo",
+        "descripcion": "PM2.5 28.4 ug/m3 en Medellin (EST-MED-02): calidad aceptable",
+        "fecha": "2026-05-21",
+        "estado": "Cerrada"
+    },
+    {
+        "id_alerta": "ALT-005",
+        "id_medicion": "A001",
+        "nivel": "Bajo",
+        "descripcion": "PM10 42.5 ug/m3 en Medellin (EST-MED-01): calidad buena",
+        "fecha": "2026-05-20",
+        "estado": "Cerrada"
     }
 ]
