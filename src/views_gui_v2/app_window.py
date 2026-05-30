@@ -9,15 +9,16 @@ from src.views_gui_v2.alertas_tab import AlertasTab
 from src.views_gui_v2.estaciones_tab import EstacionesTab
 from src.views_gui_v2.mediciones_tab import MedicionesTab
 from src.views_gui_v2.municipios_tab import MunicipiosTab
+from src.services.session_context import SesionActiva
 
 
 class AppWindow:
     """Ventana principal: un Notebook con un tab por modulo."""
 
-    def __init__(self, root: tk.Tk, role: str) -> None:
+    def __init__(self, root: tk.Tk, session: SesionActiva) -> None:
         self.root = root
-        self.role = role
-        self.can_write = role == "empleado"
+        self.session = session
+        self.can_write = session.puede_escribir
         self.root.title("Observatorio de Calidad del Aire")
         self.root.resizable(True, True)
         self._crear_layout()
@@ -35,11 +36,7 @@ class AppWindow:
         ).pack(anchor="w")
         ttk.Label(
             titulo,
-            text=(
-                "Modo empleado con permisos completos"
-                if self.can_write
-                else "Modo visitante con acceso de consulta"
-            ),
+            text=f"Sesion activa: {self.session.usuario} | Rol: {self.session.rol}",
             foreground="#4b5563",
         ).pack(anchor="w")
 
@@ -96,9 +93,11 @@ class AppWindow:
             self.root.destroy()
 
 
-def ejecutar(role: str = "empleado") -> None:
+def ejecutar(session: SesionActiva | None = None) -> None:
+    if session is None:
+        session = SesionActiva(usuario="empleado", rol="empleado")
     root = tk.Tk()
-    AppWindow(root, role=role)
+    AppWindow(root, session=session)
     root.mainloop()
 
 

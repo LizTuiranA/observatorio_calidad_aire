@@ -6,6 +6,7 @@ import tkinter as tk
 from tkinter import ttk
 
 from src.cli.auth import AuthService
+from src.services.session_context import SesionActiva
 
 
 class RoleSelector:
@@ -14,10 +15,10 @@ class RoleSelector:
     def __init__(self, parent: tk.Tk | None = None, auth_service: AuthService | None = None) -> None:
         self.parent = parent
         self.auth_service = auth_service or AuthService()
-        self._role: str | None = None
+        self._sesion: SesionActiva | None = None
         self._window: tk.Toplevel | None = None
 
-    def seleccionar(self) -> str | None:
+    def seleccionar(self) -> SesionActiva | None:
         if self.parent is None:
             self._window = tk.Tk()
         else:
@@ -83,16 +84,16 @@ class RoleSelector:
             self._window.mainloop()
         else:
             self._window.wait_window()
-        return self._role
+        return self._sesion
 
     def _abrir_login(self) -> None:
         login = EmployeeLoginDialog(self._window, self.auth_service)
         if login.ejecutar():
-            self._role = "empleado"
+            self._sesion = login.obtener_sesion()
             self._cerrar()
 
     def _seleccionar_visitante(self) -> None:
-        self._role = "visitante"
+        self._sesion = SesionActiva(usuario="visitante", rol="visitante")
         self._cerrar()
 
     def _cerrar(self) -> None:
@@ -121,6 +122,7 @@ class EmployeeLoginDialog:
         self._clave = tk.StringVar()
         self._mensaje = tk.StringVar(value="Ingresa tus credenciales para continuar.")
         self._aceptado = False
+        self._usuario_autenticado = ""
         self._intentos = 0
         self._bloqueado = False
         self._entrada_usuario: ttk.Entry | None = None
@@ -184,6 +186,7 @@ class EmployeeLoginDialog:
         clave = self._clave.get().strip()
         if self.auth_service.validar_credenciales(usuario, clave):
             self._aceptado = True
+            self._usuario_autenticado = usuario
             self._mensaje.set("Acceso concedido.")
             self._cerrar()
             return
@@ -221,6 +224,13 @@ class EmployeeLoginDialog:
         if self._window is not None:
             self._window.destroy()
             self._window = None
+
+    def obtener_sesion(self) -> SesionActiva | None:
+        """Retorna la sesion creada tras un acceso valido."""
+        if not self._aceptado:
+            return None
+        usuario = self._usuario_autenticado or self._usuario.get().strip() or "empleado"
+        return SesionActiva(usuario=usuario, rol="empleado")
 
     def _centrar(self, ancho: int, alto: int) -> None:
         self.parent.update_idletasks()
