@@ -35,6 +35,18 @@ class AuthService:
         self._input = input_func
         self._password = password_func
 
+    @property
+    def max_attempts(self) -> int:
+        """Cantidad maxima de intentos permitidos."""
+        return self._config.max_attempts
+
+    def validar_credenciales(self, usuario: str, clave: str) -> bool:
+        """Valida credenciales contra la configuracion activa."""
+        return (
+            usuario.strip() == self._config.username
+            and clave.strip() == self._config.password
+        )
+
     def autenticar(self) -> bool:
         """Solicita credenciales hasta agotar intentos."""
         print("\n--- Acceso de empleados ---")
@@ -42,7 +54,7 @@ class AuthService:
             usuario = self._input("Usuario: ").strip()
             clave = self._password("Clave: ").strip()
 
-            if usuario == self._config.username and clave == self._config.password:
+            if self.validar_credenciales(usuario, clave):
                 print("Acceso concedido.")
                 return True
 
