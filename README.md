@@ -41,10 +41,15 @@ pip install -r requirements.txt
 Desde la carpeta `observatorio_calidad_aire`, ejecutar:
 
 ```bash
-python -m src.main
+python main.py
 ```
 
-El menu principal actual permite acceder a:
+Al iniciar se muestra una pantalla de bienvenida con dos accesos:
+
+1. Empleado: abre una ventana de login y valida las credenciales ya existentes.
+2. Visitante: entra directamente en modo consulta.
+
+El sistema principal permite acceder a:
 
 1. Modulo Estaciones
 2. Modulo Municipios
