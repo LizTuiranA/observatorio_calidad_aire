@@ -2,13 +2,19 @@
 
 from src.patterns.factory_method.estacion_factory import EstacionFactory
 from src.repositories.estacion_repository import EstacionRepository
+from src.decorators.email_decorator_estacion import EmailDecoratorEstacion
+from src.services.email_service import EmailService
 
 
 class EstacionController:
     """Coordina modelo de estaciones y repositorio."""
 
     def __init__(self, repository=None):
-        self.repository = repository or EstacionRepository()
+        # Por defecto, envolver el repositorio con el decorator que notifica por email
+        self.repository = (
+            repository
+            or EmailDecoratorEstacion(EstacionRepository(), EmailService())
+        )
 
     def crear_estacion(self, id_estacion, nombre, municipio, tipo_estacion, estado):
         estacion = EstacionFactory.crear(
