@@ -139,3 +139,129 @@ Total: **60 pruebas unitarias**.
 | Daniel Felipe Moreno Suarez | Municipio | Implementado |
 | Jose Miguel Rojas Urueta | MedicionCalidadAire | Implementado |
 
+
+
+
+```mermaid
+classDiagram
+    direction BT
+    class MedicionCalidadAire {
+        <<abstract>>
+        <<dataclass>>
+        -String _id
+        -String _codigo_dane_municipio
+        -String _id_estacion
+        -datetime _fecha
+        -float _medicion
+        -String _origen
+        +tuple ORIGENES_VALIDOS
+        +get_id() str
+        +get_codigo_dane_municipio() str
+        +get_id_estacion() str
+        +get_fecha() datetime
+        +get_medicion() float
+        +get_origen() str
+        +get_nivel() str
+        +es_eliminable() bool
+        +to_dict() dict
+        -_puntos_corte() list
+        +from_dict(data)
+    }
+    class MedicionCalidadAirePM {
+        +TIPO PM
+        +str PM10
+        +str PM25
+        +tuple DIAMETROS_VALIDOS
+        -dict _PUNTOS_CORTE
+        -String _diametro_aerodinamico
+        +get_diametro_aerodinamico() str
+        +get_puntos_corte() list
+        +from_dict(data) MedicionCalidadAirePM
+        +to_dict() dict
+    }
+    class IMedicionRepository {
+        <<interface>>
+        +crear_medicion()
+        +listar_mediciones()
+        +buscar_medicion_por_id()
+        +actualizar_medicion()
+        +eliminar_medicion()
+    }
+    class MedicionRepositoryJSON {
+        -Path _RUTA_POR_DEFECTO
+        -Path _data_file
+        +crear_medicion(MedicionCalidadAire)
+        +listar_mediciones() list
+        +buscar_medicion_por_id(String id) MedicionCalidadAire
+        +actualizar_medicion(MedicionCalidadAire) MedicionCalidadAire
+        +eliminar_medicion(String id) bool
+        -asegurar_archivo()
+        -_leer_json() list~dict~
+        -_guardar_json(list~dict~)
+    }
+    class MedicionCreator {
+        <<abstract>>
+        +crear()
+        +desde_dict()
+    }
+    class PMCreator {
+        +crear(kwargs) MedicionCalidadAirePM
+        +desde_dict(dict) MedicionCalidadAirePM
+    }
+    class MedicionFactory {
+        -dict~String, Creator~ _creators
+        +registrar(String tipo, Creator creator)
+        +tipos_disponibles() list
+        +resolver(String tipo) Creator
+        +crear(String tipo, kwargs) MedicionCalidadAire
+        +desde_dict(dict) MedicionCalidadAire
+    }
+    class EmailService {
+        +enviar_notificacion(String accion, String mensaje, String entidad)
+    }
+    class EmailDecoratorMedicion {
+        -IMedicionRepository _wrapped
+        -EmailService _email
+        +crear_medicion(MedicionCalidadAire)
+        +listar_mediciones() list
+        +buscar_medicion_por_id(String id) MedicionCalidadAire
+        +actualizar_medicion(MedicionCalidadAire) MedicionCalidadAire
+        +eliminar_medicion(String id) bool
+    }
+    class MedicionController {
+        -IMedicionRepository _repository
+        -MedicionCalidadAireView _view
+        +crear_medicion(MedicionCalidadAire)
+        +actualizar_medicion(MedicionCalidadAire)
+        +eliminar_medicion(id)
+        +listar_mediciones() list
+        #_buscar_editable(String id)
+    }
+    class MedicionCalidadAireView {
+        -MedicionController _controller
+        +mostrar_menu()
+        +show_message()
+        +show_error()
+        +show_mediciones(list)
+        +pedir_input()
+    }
+    %% Relaciones de Herencia e Implementacion
+    MedicionCalidadAirePM --|> MedicionCalidadAire : extends
+    MedicionRepositoryJSON ..|> IMedicionRepository : implements
+    PMCreator --|> MedicionCreator : extends
+
+    %% Persistencia
+    IMedicionRepository ..> MedicionCalidadAire : persiste
+
+    %% Factory y Creators
+    PMCreator ..> MedicionCalidadAire : crea
+    MedicionFactory ..> MedicionCreator : escoge
+
+    %% Decorator y notificacion
+    EmailDecoratorMedicion ..> IMedicionRepository : envuelve
+    EmailService ..> EmailDecoratorMedicion : notifica
+
+    %% MVC
+    MedicionController ..> MedicionCalidadAireView : usa
+    MedicionController ..> IMedicionRepository : usa
+```
