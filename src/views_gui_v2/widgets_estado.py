@@ -1,3 +1,9 @@
+"""Shim: reexporta `EstadoWidget` desde `src.views_gui.widgets_estado`.
+
+Esto evita dependencias circulares y permite que los módulos que esperan
+`src.views_gui_v2.widgets_estado` funcionen sin reescribir código.
+"""
+
 """Widgets reutilizables para mensajes de estado en GUI."""
 
 import tkinter as tk
@@ -5,26 +11,28 @@ from tkinter import ttk
 
 
 class EstadoWidget:
-    """Maneja mensajes de estado visibles para el usuario."""
+	"""Maneja mensajes de estado visibles para el usuario."""
 
-    COLORES = {
-        "info": "#1f2937",
-        "success": "#065f46",
-        "error": "#991b1b",
-    }
+	COLORES = {
+		"info": "#1f2937",
+		"success": "#065f46",
+		"error": "#991b1b",
+	}
 
-    def __init__(self, parent) -> None:
-        self._texto = tk.StringVar(value="Listo")
-        self.label = ttk.Label(parent, textvariable=self._texto)
-        self._set_color("info")
+	def __init__(self, parent) -> None:
+		self._texto = tk.StringVar(value="Listo")
+		self.label = ttk.Label(parent, textvariable=self._texto)
+		self._set_color("info")
 
-    def mostrar(self, mensaje: str, tipo: str = "info") -> None:
-        self._texto.set(mensaje)
-        self._set_color(tipo)
+	def mostrar(self, mensaje: str, tipo: str = "info") -> None:
+		self._texto.set(mensaje)
+		self._set_color(tipo)
 
-    def valor(self) -> str:
-        return self._texto.get()
+	def valor(self) -> str:
+		return self._texto.get()
 
-    def _set_color(self, tipo: str) -> None:
-        color = self.COLORES.get(tipo, self.COLORES["info"])
-        self.label.configure(foreground=color)
+	def _set_color(self, tipo: str) -> None:
+		color = self.COLORES.get(tipo, self.COLORES["info"])
+		self.label.configure(foreground=color)
+
+__all__ = ["EstadoWidget"]
