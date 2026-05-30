@@ -9,7 +9,9 @@ from src.patterns.strategy.estrategia_clasificacion import (
     EstrategiaAcademica,
     EstrategiaClasificacion,
 )
+from src.decorators.email_decorator_alerta import EmailDecoratorAlerta
 from src.repositories.alerta_repository import AlertaRepository
+from src.services.email_service import EmailService
 
 
 class _ClasificadorEstrategiaAdapter:
@@ -30,7 +32,9 @@ class AlertaController:
         repository=None,
         estrategia: EstrategiaClasificacion | None = None,
     ):
-        self.repository = repository or AlertaRepository()
+        self.repository = repository or EmailDecoratorAlerta(
+            AlertaRepository(), EmailService()
+        )
         self._estrategia = estrategia or EstrategiaAcademica()
         self._facade = AlertaFacade(
             alerta_repository=self.repository,
