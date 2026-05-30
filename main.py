@@ -13,12 +13,12 @@ load_dotenv()
 def main() -> None:
     """Abre la pantalla de bienvenida y luego la GUI principal."""
     selector = RoleSelector()
-    rol = selector.seleccionar()
-    if rol is None:
+    sesion = selector.seleccionar()
+    if sesion is None:
         return
 
     app_root = tk.Tk()
-    AppWindow(app_root, role=rol)
+    AppWindow(app_root, session=sesion)
     app_root.mainloop()
 
 
