@@ -14,12 +14,15 @@ Regla de negocio: si `nivel == "Alto"`, el estado se fuerza a `Activa`
 ```mermaid
 stateDiagram-v2
     [*] --> Activa: crear_alerta() [nivel == Alto]
-    [*] --> Activa: crear_alerta() [estado = Activa]
+    [*] --> Activa: crear_alerta() [nivel != Alto y estado = Activa]
     [*] --> Cerrada: crear_alerta() [nivel != Alto y estado = Cerrada]
 
-    Activa --> Cerrada: actualizar_alerta() [nivel != Alto]
     Activa --> Activa: actualizar_alerta() [nivel == Alto] / fuerza Activa
-    Cerrada --> Activa: actualizar_alerta()
+    Cerrada --> Activa: actualizar_alerta() [nivel == Alto] / fuerza Activa
+    Activa --> Activa: actualizar_alerta() [nivel != Alto y estado = Activa]
+    Cerrada --> Activa: actualizar_alerta() [nivel != Alto y estado = Activa]
+    Activa --> Cerrada: actualizar_alerta() [nivel != Alto y estado = Cerrada]
+    Cerrada --> Cerrada: actualizar_alerta() [nivel != Alto y estado = Cerrada]
 
     Activa --> [*]: eliminar_alerta()
     Cerrada --> [*]: eliminar_alerta()
@@ -30,11 +33,11 @@ stateDiagram-v2
 | Estado origen | Evento | Guarda | Estado destino |
 |---------------|--------|--------|----------------|
 | (inicial) | `crear_alerta()` | `nivel == Alto` | Activa |
-| (inicial) | `crear_alerta()` | `estado = Activa` | Activa |
+| (inicial) | `crear_alerta()` | `nivel != Alto` y `estado = Activa` | Activa |
 | (inicial) | `crear_alerta()` | `nivel != Alto` y `estado = Cerrada` | Cerrada |
-| Activa | `actualizar_alerta()` | `nivel != Alto` | Cerrada |
-| Activa | `actualizar_alerta()` | `nivel == Alto` | Activa (se mantiene) |
-| Cerrada | `actualizar_alerta()` | — | Activa |
+| Activa o Cerrada | `actualizar_alerta()` | `nivel == Alto` | Activa (forzada por regla de negocio) |
+| Activa o Cerrada | `actualizar_alerta()` | `nivel != Alto` y `estado = Activa` | Activa |
+| Activa o Cerrada | `actualizar_alerta()` | `nivel != Alto` y `estado = Cerrada` | Cerrada |
 | Activa / Cerrada | `eliminar_alerta()` | — | (final) |
 
 ---
