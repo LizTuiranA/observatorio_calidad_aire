@@ -26,5 +26,12 @@
         "departamento": "Cundinamarca",
         "region": "Andina",
         "estado": "Activo"
+    },
+    {
+        "id_municipio": "05321",
+        "nombre": "Guatape",
+        "departamento": "Antioquia",
+        "region": "Andina",
+        "estado": "Activo"
     }
 ]
