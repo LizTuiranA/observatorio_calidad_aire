@@ -3,12 +3,15 @@ from tkinter import ttk, messagebox
 from src.controllers.municipio_controller import MunicipioController
 from src.controllers.estacion_controller import EstacionController
 from src.controllers.medicion_calidad_aire_controller import MedicionController
+from src.controllers.alerta_controller import AlertaController
 
 class VisitanteTab:
     def __init__(self, parent: ttk.Frame) -> None:
+        # Instanciamos todos los controladores del equipo
         self.mun_ctrl = MunicipioController()
         self.est_ctrl = EstacionController()
         self.med_ctrl = MedicionController()
+        self.ale_ctrl = AlertaController()
         
         self.frame = ttk.Frame(parent, padding="10")
         self.frame.pack(fill=tk.BOTH, expand=True)
@@ -26,8 +29,7 @@ class VisitanteTab:
         self.combo_municipios = ttk.Combobox(filtro_frame, state="readonly", width=40)
         self.combo_municipios.pack(side=tk.LEFT, padx=5)
         
-        # Único botón permitido en toda la interfaz de visitante
-        ttk.Button(filtro_frame, text="Consultar", command=self.consultar_datos).pack(side=tk.LEFT, padx=15)
+        ttk.Button(filtro_frame, text="Consultar / Refrescar", command=self.consultar_datos).pack(side=tk.LEFT, padx=15)
 
     def _crear_tablas(self):
         """Crea el sistema de pestañas para visualizar los datos en tablas."""
@@ -47,7 +49,7 @@ class VisitanteTab:
         # --- 2. Pestaña de Estaciones ---
         frame_est = ttk.Frame(notebook)
         notebook.add(frame_est, text="Estaciones")
-        cols_est = ("ID Estación", "Nombre", "Ubicación", "Estado")
+        cols_est = ("ID Estación", "Nombre", "Municipio ID", "Estado")
         self.tree_est = ttk.Treeview(frame_est, columns=cols_est, show="headings")
         for col in cols_est: 
             self.tree_est.heading(col, text=col)
@@ -64,45 +66,79 @@ class VisitanteTab:
             self.tree_med.column(col, anchor=tk.CENTER)
         self.tree_med.pack(fill=tk.BOTH, expand=True)
 
+        # --- 4. Pestaña de Alertas ---
+        frame_ale = ttk.Frame(notebook)
+        notebook.add(frame_ale, text="Alertas Emitidas")
+        cols_ale = ("ID Alerta", "Gravedad", "Fecha", "Medición ID")
+        self.tree_ale = ttk.Treeview(frame_ale, columns=cols_ale, show="headings")
+        for col in cols_ale: 
+            self.tree_ale.heading(col, text=col)
+            self.tree_ale.column(col, anchor=tk.CENTER)
+        self.tree_ale.pack(fill=tk.BOTH, expand=True)
+
     def cargar_datos_iniciales(self):
-        """Carga la lista de municipios en el combobox y en la tabla principal."""
+        """Carga la lista de municipios en el combobox e invoca la primera consulta."""
         try:
             municipios = self.mun_ctrl.listar_municipios()
-            # Mapeo para facilitar el filtro por ID internamente
             self.mapa_municipios = {f"{m.nombre} ({m.id_municipio})": m.id_municipio for m in municipios}
             valores = ["Todos"] + list(self.mapa_municipios.keys())
             self.combo_municipios.config(values=valores)
             self.combo_municipios.set("Todos")
             
-            # Llenar la tabla de municipios
-            self._llenar_tabla_municipios(municipios)
+            self.consultar_datos()
         except Exception as e:
             messagebox.showerror("Error", f"Error al cargar los datos base: {str(e)}")
 
     def consultar_datos(self):
-        """Filtra y muestra la información en las tablas según el municipio seleccionado."""
-        # Primero limpiamos las tablas de estaciones y mediciones
+        """Filtra y muestra la información en todas las tablas según el municipio."""
+        # Limpiar todas las tablas antes de llenarlas
+        for item in self.tree_mun.get_children(): self.tree_mun.delete(item)
         for item in self.tree_est.get_children(): self.tree_est.delete(item)
         for item in self.tree_med.get_children(): self.tree_med.delete(item)
+        for item in self.tree_ale.get_children(): self.tree_ale.delete(item)
 
         seleccion = self.combo_municipios.get()
         id_mun_filtro = None if seleccion == "Todos" else self.mapa_municipios.get(seleccion)
 
-        if id_mun_filtro:
-            mensaje = f"Filtrando estaciones y mediciones para el municipio ID: {id_mun_filtro}"
-        else:
-            mensaje = "Consultando todas las estaciones y mediciones en el sistema."
-            
-        messagebox.showinfo("Consulta de Visitante", mensaje + "\n(Las tablas se llenarán cuando se integren los controladores de tus compañeros)")
+        try:
+            # 1. Cargar Municipios
+            municipios = self.mun_ctrl.listar_municipios()
+            if id_mun_filtro:
+                municipios = [m for m in municipios if m.id_municipio == id_mun_filtro]
+            for m in municipios:
+                self.tree_mun.insert("", tk.END, values=(m.id_municipio, m.nombre, m.departamento, m.region, m.estado))
 
-        estaciones = self.est_ctrl.listar_por_municipio(id_mun_filtro)
-        for e in estaciones: self.tree_est.insert("", tk.END, values=(...))
-        
-        mediciones = self.med_ctrl.listar_por_municipio(id_mun_filtro)
-        for m in mediciones: self.tree_med.insert("", tk.END, values=(...))
+            # 2. Cargar Estaciones (Corregido a listar_estaciones)
+            estaciones = self.est_ctrl.listar_estaciones()
+            if id_mun_filtro:
+                estaciones = [e for e in estaciones if getattr(e, 'id_municipio', getattr(e, 'municipio', '')) == id_mun_filtro]
+            for e in estaciones:
+                self.tree_est.insert("", tk.END, values=(
+                    getattr(e, 'id_estacion', ''), getattr(e, 'nombre', ''), 
+                    getattr(e, 'id_municipio', getattr(e, 'municipio', '')), getattr(e, 'estado', '')
+                ))
 
-    def _llenar_tabla_municipios(self, municipios):
-        for item in self.tree_mun.get_children():
-            self.tree_mun.delete(item)
-        for m in municipios:
-            self.tree_mun.insert("", tk.END, values=(m.id_municipio, m.nombre, m.departamento, m.region, m.estado))
+            # 3. Cargar Mediciones (Corregido a obtener_mediciones)
+            mediciones = self.med_ctrl.obtener_mediciones()
+            if id_mun_filtro:
+                estaciones_ids = [getattr(e, 'id_estacion', '') for e in estaciones]
+                mediciones = [m for m in mediciones if getattr(m, 'id_estacion', '') in estaciones_ids]
+            for m in mediciones:
+                self.tree_med.insert("", tk.END, values=(
+                    getattr(m, 'id_medicion', getattr(m, 'id', '')), getattr(m, 'fecha', ''), 
+                    getattr(m, 'contaminante', getattr(m, 'tipo', '')), getattr(m, 'valor', getattr(m, 'medicion', ''))
+                ))
+
+            # 4. Cargar Alertas (Corregido a listar_alertas)
+            alertas = self.ale_ctrl.listar_alertas()
+            if id_mun_filtro:
+                mediciones_ids = [getattr(m, 'id_medicion', getattr(m, 'id', '')) for m in mediciones]
+                alertas = [a for a in alertas if getattr(a, 'id_medicion', '') in mediciones_ids]
+            for a in alertas:
+                self.tree_ale.insert("", tk.END, values=(
+                    getattr(a, 'id_alerta', ''), getattr(a, 'gravedad', getattr(a, 'nivel', '')), 
+                    getattr(a, 'fecha', getattr(a, 'fecha_emision', '')), getattr(a, 'id_medicion', '')
+                ))
+
+        except Exception as e:
+            messagebox.showwarning("Aviso", f"Error cruzando los datos: {e}\nRevisa que haya registros en los JSON.")
