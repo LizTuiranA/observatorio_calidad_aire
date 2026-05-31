@@ -1,4 +1,4 @@
-"""Tab de alertas con flujo minimo para crear, registrar y reportar."""
+"""Tab de alertas: CRUD completo + registro critico y reporte (patrones)."""
 
 from __future__ import annotations
 
@@ -8,14 +8,24 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 
 from src.controllers.alerta_controller import AlertaController
+from src.controllers.medicion_calidad_aire_controller import MedicionController
+from src.controllers.municipio_controller import MunicipioController
 from src.views_gui_v2.widgets_estado import EstadoWidget
 
 
 class AlertasTab:
     """Pestana de alertas conectada al controlador real."""
 
-    def __init__(self, parent: ttk.Frame, controller: AlertaController | None = None) -> None:
+    def __init__(
+        self,
+        parent: ttk.Frame,
+        controller: AlertaController | None = None,
+        medicion_controller: MedicionController | None = None,
+        municipio_controller: MunicipioController | None = None,
+    ) -> None:
         self.controller = controller or AlertaController()
+        self.medicion_controller = medicion_controller or MedicionController()
+        self.municipio_controller = municipio_controller or MunicipioController()
         self._alerta_seleccionada_id: str | None = None
         self._ultima_alerta = None
 
@@ -46,8 +56,24 @@ class AlertasTab:
         self.estado_var = tk.StringVar(value="Activa")
 
         self._agregar_campo(marco, "ID alerta", self.id_alerta_var, 0, 0)
-        self._agregar_campo(marco, "ID medicion", self.id_medicion_var, 0, 2)
-        self._agregar_campo(marco, "Municipio", self.municipio_var, 1, 0)
+
+        # ID medicion como desplegable (autocompleta municipio y valor PM2.5).
+        ttk.Label(marco, text="ID medicion").grid(row=0, column=2, sticky="w", padx=(12, 8), pady=4)
+        self._cb_medicion = ttk.Combobox(
+            marco,
+            textvariable=self.id_medicion_var,
+            state="readonly",
+            postcommand=self._cargar_mediciones,
+        )
+        self._cb_medicion.grid(row=0, column=3, sticky="ew", pady=4)
+        self._cb_medicion.bind("<<ComboboxSelected>>", self._al_elegir_medicion)
+
+        # Municipio: solo lectura, se llena segun la medicion elegida.
+        ttk.Label(marco, text="Municipio").grid(row=1, column=0, sticky="w", padx=(0, 8), pady=4)
+        ttk.Entry(
+            marco, textvariable=self.municipio_var, state="readonly"
+        ).grid(row=1, column=1, sticky="ew", pady=4)
+
         self._agregar_campo(marco, "Valor PM2.5", self.valor_pm25_var, 1, 2)
         self._agregar_campo(marco, "Descripcion", self.descripcion_var, 2, 0, colspan=3)
         self._agregar_campo(marco, "Fecha (YYYY-MM-DD)", self.fecha_var, 3, 0)
@@ -74,6 +100,8 @@ class AlertasTab:
         acciones.grid(row=5, column=0, columnspan=4, sticky="w", pady=(10, 0))
         ttk.Button(acciones, text="Crear manual", command=self._crear_manual).pack(side="left", padx=(0, 6))
         ttk.Button(acciones, text="Registrar critica", command=self._registrar_critica).pack(side="left", padx=(0, 6))
+        ttk.Button(acciones, text="Actualizar", command=self._actualizar).pack(side="left", padx=(0, 6))
+        ttk.Button(acciones, text="Eliminar", command=self._eliminar).pack(side="left", padx=(0, 6))
         ttk.Button(acciones, text="Generar reporte", command=self._generar_reporte).pack(side="left", padx=(0, 6))
         ttk.Button(acciones, text="Limpiar", command=self._limpiar).pack(side="left")
 
@@ -97,6 +125,38 @@ class AlertasTab:
             sticky="ew",
             pady=4,
         )
+
+    # ─── Desplegable de mediciones / autocompletado ──────────────────
+    def _cargar_mediciones(self) -> None:
+        try:
+            self._cb_medicion["values"] = [
+                m.id for m in self.medicion_controller.obtener_mediciones()
+            ]
+        except Exception:
+            self._cb_medicion["values"] = []
+
+    def _al_elegir_medicion(self, _event=None) -> None:
+        id_medicion = self.id_medicion_var.get().strip()
+        if not id_medicion:
+            return
+        medicion = self.medicion_controller.obtener_medicion_por_id(id_medicion)
+        if medicion is None:
+            self._set_municipio("")
+            return
+        self._set_municipio(self._nombre_municipio(medicion.codigo_dane_municipio))
+        # El valor medido sirve como base para "Registrar critica".
+        self.valor_pm25_var.set(str(medicion.medicion))
+
+    def _nombre_municipio(self, codigo_dane: str) -> str:
+        try:
+            municipio = self.municipio_controller.buscar_municipio(codigo_dane)
+        except Exception:
+            return codigo_dane
+        return f"{municipio.id_municipio} - {municipio.nombre}"
+
+    def _set_municipio(self, texto: str) -> None:
+        # municipio_var es readonly; se asigna por codigo.
+        self.municipio_var.set(texto)
 
     def _construir_listado(self, parent: ttk.Frame) -> None:
         marco = ttk.LabelFrame(parent, text="Alertas registradas", padding=10)
@@ -176,6 +236,49 @@ class AlertasTab:
         )
         self.refrescar()
         self._mostrar_reporte(alerta, valor_pm25=valor)
+
+    def _actualizar(self) -> None:
+        id_alerta = self.id_alerta_var.get().strip()
+        if not id_alerta:
+            self._estado.mostrar("Selecciona una alerta de la tabla para actualizar", "error")
+            return
+        if not messagebox.askyesno("Confirmar", f"Actualizar la alerta '{id_alerta}'?"):
+            self._estado.mostrar("Operacion cancelada", "info")
+            return
+        try:
+            alerta = self.controller.actualizar_alerta(
+                id_alerta,
+                self.id_medicion_var.get().strip(),
+                self.nivel_var.get().strip(),
+                self.descripcion_var.get().strip(),
+                self.fecha_var.get().strip(),
+                self.estado_var.get().strip(),
+            )
+        except Exception as error:  # pragma: no cover
+            self._estado.mostrar(str(error), "error")
+            return
+
+        self._ultima_alerta = alerta
+        self._estado.mostrar(f"Alerta {alerta.id_alerta} actualizada", "success")
+        self.refrescar()
+
+    def _eliminar(self) -> None:
+        id_alerta = self.id_alerta_var.get().strip()
+        if not id_alerta:
+            self._estado.mostrar("Selecciona una alerta de la tabla para eliminar", "error")
+            return
+        if not messagebox.askyesno("Confirmar", f"Eliminar la alerta '{id_alerta}'?"):
+            self._estado.mostrar("Operacion cancelada", "info")
+            return
+        try:
+            self.controller.eliminar_alerta(id_alerta)
+        except Exception as error:  # pragma: no cover
+            self._estado.mostrar(str(error), "error")
+            return
+
+        self._estado.mostrar(f"Alerta {id_alerta} eliminada", "success")
+        self._limpiar()
+        self.refrescar()
 
     def _generar_reporte(self) -> None:
         alerta = self._alerta_desde_seleccion() or self._ultima_alerta
@@ -257,6 +360,13 @@ class AlertasTab:
             self.fecha_var.set(alerta.fecha)
             self.nivel_var.set(alerta.nivel)
             self.estado_var.set(alerta.estado)
+            # Resuelve municipio (y valor) de la medicion asociada, si existe.
+            medicion = self.medicion_controller.obtener_medicion_por_id(alerta.id_medicion)
+            if medicion is not None:
+                self._set_municipio(self._nombre_municipio(medicion.codigo_dane_municipio))
+                self.valor_pm25_var.set(str(medicion.medicion))
+            else:
+                self._set_municipio("")
             self._estado.mostrar(f"Alerta {alerta.id_alerta} seleccionada", "info")
 
     def _alerta_desde_seleccion(self):
